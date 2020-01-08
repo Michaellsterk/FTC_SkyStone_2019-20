@@ -147,7 +147,11 @@ public class FoundationRedBuilding extends LinearOpMode {
             double leftBPower = leftBack.getPower();
             double rightBPower = rightBack.getPower();
 
-            strafe(-0.5,2.2);
+            strafe(-0.5,2.1);
+
+            straight(0.5,0.5);
+
+            straight(-0.2,0.125);
 
             foundGrabber.setPosition(0.7);
 
@@ -167,9 +171,9 @@ public class FoundationRedBuilding extends LinearOpMode {
 
             strafe(-0.5, 1.8);
 
-            straight(-0.2, 1.3);
+            //straight(-0.2, 0.7);
 
-            strafe(0.5, 1.7);
+            strafe(0.5, 1.8);
 
             autoEnd = true;
 
