@@ -63,6 +63,8 @@ public class CompRobot extends LinearOpMode {
     private DcMotor leftBack = null;
     private DcMotor rightBack = null;
     private Servo foundGrabber = null;
+    private Servo capstoneArm = null;
+    boolean controller2Toggle = false;
 
     // declare motor speed variables
     double RF; double LF; double RR; double LR;
@@ -85,6 +87,7 @@ public class CompRobot extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotor.class, "fr_motor");
         rightBack = hardwareMap.get(DcMotor.class, "br_motor");
         foundGrabber = hardwareMap.get(Servo.class, "found_servo");
+        capstoneArm = hardwareMap.get(Servo.class, "capStone_servo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -111,10 +114,19 @@ public class CompRobot extends LinearOpMode {
             LF = 0; RF = 0; LR = 0; RR = 0;
 
             // Get joystick values
-            Y1 = -gamepad1.right_stick_y * joyScale; // invert so up is positive
-            X1 = gamepad1.right_stick_x * joyScale;
-            Y2 = -gamepad1.left_stick_y * joyScale; // Y2 is not used at present
-            X2 = gamepad1.left_stick_x * joyScale;
+            // Is toggleable between drivers
+            if(!controller2Toggle) {
+                Y1 = -gamepad1.right_stick_y * joyScale; // invert so up is positive
+                X1 = gamepad1.right_stick_x * joyScale;
+                Y2 = -gamepad1.left_stick_y * joyScale; // Y2 is not used at present
+                X2 = gamepad1.left_stick_x * joyScale;
+            }
+            else {
+                Y1 = -gamepad2.right_stick_y * joyScale; // invert so up is positive
+                X1 = gamepad2.right_stick_x * joyScale;
+                Y2 = -gamepad2.left_stick_y * joyScale; // Y2 is not used at present
+                X2 = gamepad2.left_stick_x * joyScale;
+            }
 
             // Forward/back movement
             LF += Y1; RF += Y1; LR += Y1; RR += Y1;
@@ -137,22 +149,49 @@ public class CompRobot extends LinearOpMode {
             leftBack.setPower(LR);
             rightBack.setPower(RR);
 
-            if(gamepad1.a) {
+            //Lowers and raises the foundation grabber
+            if(gamepad1.a||gamepad2.a) {
                 foundGrabber.setPosition(0.7);
             }
-            else if(gamepad1.b) {
+            else if(gamepad1.b||gamepad2.b) {
                 foundGrabber.setPosition(-0.7);
             }
-            if(gamepad1.right_trigger>=0.5) {
-                joyScale = 0.25;
+
+            //Flips out and flips back the arm holding the capstone
+            if(gamepad1.x||gamepad2.x) {
+                capstoneArm.setPosition(1);
             }
-            else if(gamepad1.x && gamepad1.y) {
-                joyScale = 1;
-            }
-            else {
-                joyScale = 0.5;
+            else if(gamepad1.y||gamepad2.y) {
+                capstoneArm.setPosition(-0.4);
             }
 
+            //Holding the right trigger slows down the robot to 50% speed for added precision
+            if (!controller2Toggle) {
+                if (gamepad1.right_trigger >= 0.5) {
+                    joyScale = 0.25;
+                } else {
+                    joyScale = 0.5;
+                }
+            }
+            else {
+                if (gamepad2.right_trigger >= 0.5) {
+                    joyScale = 0.25;
+                } else {
+                    joyScale = 0.5;
+                }
+            }
+
+            /*If either controller presses both bumpers the drive controls swap controller
+            this will be our fail safe in case the primary driver's controller stops working
+             */
+            if((gamepad1.right_bumper&&gamepad1.left_bumper)||(gamepad2.right_bumper&&gamepad2.left_bumper)) {
+                if (!controller2Toggle) {
+                    controller2Toggle = true;
+                }
+                else {
+                    controller2Toggle = false;
+                }
+            }
 
 
             // Show the elapsed game time and wheel power.
