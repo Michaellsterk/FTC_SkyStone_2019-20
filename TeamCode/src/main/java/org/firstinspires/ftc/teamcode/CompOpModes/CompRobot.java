@@ -64,7 +64,9 @@ public class CompRobot extends LinearOpMode {
     private DcMotor rightBack = null;
     private Servo foundGrabber = null;
     private Servo capstoneArm = null;
-    boolean controller2Toggle = false;
+    private Servo stoneGrabber = null;
+    private boolean controller2Toggle = false;
+    private String hasControl = "";
 
     // declare motor speed variables
     double RF; double LF; double RR; double LR;
@@ -88,6 +90,7 @@ public class CompRobot extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotor.class, "br_motor");
         foundGrabber = hardwareMap.get(Servo.class, "found_servo");
         capstoneArm = hardwareMap.get(Servo.class, "capStone_servo");
+        stoneGrabber = hardwareMap.get(Servo.class, "stone_servo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -165,6 +168,13 @@ public class CompRobot extends LinearOpMode {
                 capstoneArm.setPosition(-0.4);
             }
 
+            if(gamepad1.dpad_down||gamepad2.dpad_down) {
+                stoneGrabber.setPosition(0);
+            }
+            else if(gamepad1.dpad_up||gamepad2.dpad_up){
+                stoneGrabber.setPosition(1);
+            }
+
             //Holding the right trigger slows down the robot to 50% speed for added precision
             if (!controller2Toggle) {
                 if (gamepad1.right_trigger >= 0.5) {
@@ -193,10 +203,18 @@ public class CompRobot extends LinearOpMode {
                 }
             }
 
+            if(controller2Toggle) {
+                hasControl = "Secondary";
+            }
+            else {
+                hasControl = "Primary";
+            }
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("PowerScale", "Current Scaling: (%.1f)", joyScale);
+            telemetry.addData("Power Scaling: ", "(%.1f)", joyScale);
+            telemetry.addData("Driver Controlling: ", hasControl);
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
         }
