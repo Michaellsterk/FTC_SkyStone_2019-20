@@ -358,7 +358,7 @@ public class TestVuforiaAuto extends LinearOpMode {
                 if (targetVisible) {
                     VectorF translation = lastLocation.getTranslation();
                     for (int i = 0; i < vuforiaInputs.length; i++) {
-                        vuforiaInputs[i] = translation.get(1);
+                        vuforiaInputs[i] = translation.get(1) / mmPerInch;
                         wait(0.05);
                     }
                     targetsSkyStone.deactivate();
@@ -395,6 +395,7 @@ public class TestVuforiaAuto extends LinearOpMode {
                 averageFound = true;
             }
             telemetry.addData("Vuforia Average", "(%.1f)", averageVu);
+            wait(0.05);
             telemetry.update();
             if (runtime.seconds()>29) {
                 autoEnd = true;
