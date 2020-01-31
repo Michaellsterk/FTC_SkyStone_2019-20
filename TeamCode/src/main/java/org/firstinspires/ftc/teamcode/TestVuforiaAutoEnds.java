@@ -27,10 +27,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.CompOpModes;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -144,18 +147,91 @@ public class TestVuforiaAutoEnds extends LinearOpMode {
     private double averageVu = 0.0;
     private boolean averageFound = false;
 
+    // Stone Selection
+    private int stonePos;
+
+    // Movement Variables
+    private DcMotor leftFront = null;
+    private DcMotor rightFront = null;
+    private DcMotor leftBack = null;
+    private DcMotor rightBack = null;
+    private Servo foundGrabber = null;
+    private Servo capstoneArm = null;
+    private Servo stoneGrabber = null;
+
     public void wait(double secs) {
         ElapsedTime t = new ElapsedTime();
         t.reset();
         while (t.seconds() < secs && opModeIsActive()){}
     }
 
+    public void straight(double power, double secs) {
+        ElapsedTime t = new ElapsedTime();
+        t.reset();
+        while (t.seconds() < secs && opModeIsActive()){
+            leftFront.setPower(power);
+            leftBack.setPower(power);
+            rightFront.setPower(power);
+            rightBack.setPower(power);
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+    }
+
+    public void turn(double powerLeft, double powerRight, double secs) {
+        ElapsedTime t = new ElapsedTime();
+        t.reset();
+        while (t.seconds() < secs && opModeIsActive()){
+            leftFront.setPower(powerLeft);
+            leftBack.setPower(powerLeft);
+            rightFront.setPower(powerRight);
+            rightBack.setPower(powerRight);
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+    }
+
+    public void strafe(double power, double secs) {
+        ElapsedTime t = new ElapsedTime();
+        t.reset();
+        while(t.seconds() < secs && opModeIsActive()) {
+            leftFront.setPower(power);
+            leftBack.setPower(power*-1);
+            rightFront.setPower(power*-1);
+            rightBack.setPower(power);
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+    }
+
     @Override public void runOpMode() {
+        leftFront  = hardwareMap.get(DcMotor.class, "fl_motor");
+        leftBack  = hardwareMap.get(DcMotor.class, "bl_motor");
+        rightFront = hardwareMap.get(DcMotor.class, "fr_motor");
+        rightBack = hardwareMap.get(DcMotor.class, "br_motor");
+        foundGrabber = hardwareMap.get(Servo.class, "found_servo");
+        capstoneArm = hardwareMap.get(Servo.class, "capStone_servo");
+        stoneGrabber = hardwareMap.get(Servo.class, "stone_servo");
+
+        // Most robots need the motor on one side to be reversed to drive forward
+        // Reverse the motor that runs backwards when connected directly to the battery
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
         waitForStart();
         runtime.reset();
         Boolean autoEnd = false;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive() && !autoEnd) {
+            foundGrabber.setPosition(0.7);
+            //straight();
             while(!averageFound) {
                 /*
                  * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -395,11 +471,39 @@ public class TestVuforiaAutoEnds extends LinearOpMode {
                     averageFound = true;
                 }
             }
+
+            wait(1.0);
+
+            // Finds which stone is a Skystone
+            if (averageVu < -2) {
+                stonePos = 0;
+            }
+            else if (averageVu > 2) {
+                stonePos = 2;
+            }
+            else {
+                stonePos = 1;
+            }
+
+            wait(1.0);
+
+            // Runs seperate code based of stone pos
+            if (stonePos == 0) {
+                strafe(-0.7,1.0);
+            }
+            else if (stonePos == 2) {
+                strafe(0.7, 1.0);
+            }
+            else {
+                straight(-0.7,1.0);
+            }
+
+            wait(5.0);
+
+            autoEnd = true;
+
             telemetry.addData("Vuforia Average", "(%.1f)", averageVu);
             telemetry.update();
-            if (runtime.seconds()>29) {
-                autoEnd = true;
-            }
         }
     }
 }
