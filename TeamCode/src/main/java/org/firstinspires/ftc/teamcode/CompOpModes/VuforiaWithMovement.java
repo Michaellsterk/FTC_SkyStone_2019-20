@@ -234,7 +234,7 @@ public class VuforiaWithMovement extends LinearOpMode {
         while (opModeIsActive() && !autoEnd && !isStopRequested()) {
             foundGrabber.setPosition(0.7);
             //Move to start position
-            straight(0.2, 0.75);
+            straight(0.2, 0.8);
             wait(0.1);
 
             telemetry.addData("Status", "Finished Startup");
@@ -418,7 +418,7 @@ public class VuforiaWithMovement extends LinearOpMode {
             // Note: To use the remote camera preview:
             // AFTER you hit Init on the Driver Station, use the "options menu" to select "Camera Stream"
             // Tap the preview window to receive a fresh image.
-
+            com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
             targetsSkyStone.activate();
             //while (!isStopRequested()) {
             while (!vuforiaDone) {
@@ -461,6 +461,8 @@ public class VuforiaWithMovement extends LinearOpMode {
 
             telemetry.addData("Status", "Finished Vuforia");
             telemetry.update();
+
+            com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
 
             foundGrabber.setPosition(-0.7);
             /*
