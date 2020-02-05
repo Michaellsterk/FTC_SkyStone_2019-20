@@ -147,7 +147,7 @@ public class FoundationRedBuilding extends LinearOpMode {
             double leftBPower = leftBack.getPower();
             double rightBPower = rightBack.getPower();
 
-            strafe(-0.5,2.1);
+            strafe(-0.5,2.6);
 
             straight(0.5,0.5);
 
