@@ -159,7 +159,7 @@ public class FoundationBlueBuilding extends LinearOpMode {
 
             straight(-0.5,0.3);
 
-            turn(-0.5,0.5,1.2);
+            turn(-0.5,0.5,1.8);
 
             straight(0.5,1.5);
 
@@ -167,13 +167,13 @@ public class FoundationBlueBuilding extends LinearOpMode {
 
             strafe(-0.5,1);
 
-            straight(0.5,0.3);
+            straight(0.5,0.4);
 
             strafe(0.5, 1.8);
 
             straight(-0.2, 0.7);
 
-            strafe(-0.5, 1.8);
+            strafe(-0.5, 2.3);
 
             autoEnd = true;
 
