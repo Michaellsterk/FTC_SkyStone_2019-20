@@ -525,7 +525,28 @@ public class VuforiaWithMovement extends LinearOpMode {
                 telemetry.addData("Stone Position", "Center");
                 telemetry.update();
 
-                straight(-0.3, 0.3);
+                turn(-0.5,0.5,1.2);
+                straight(-0.2,1.3);
+
+                strafe(-0.2,0.3);
+
+                stoneGrabber.setPosition(0);
+
+                wait(0.5);
+
+                straight(0.2,1.0);
+
+                turn(-0.5,0.5,0.7);
+
+                straight(-0.5,1.8);
+
+                stoneGrabber.setPosition(1);
+
+                wait(0.5);
+
+                straight(0.5,1.8);
+
+                turn(0.5,-0.5,0.7);
             }
 
             wait(5.0);
