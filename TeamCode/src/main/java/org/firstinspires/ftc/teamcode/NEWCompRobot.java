@@ -76,12 +76,15 @@ public class NEWCompRobot extends LinearOpMode {
     int targetEncoderArmV = 0;
     int nextEncoderArmV = 0;
     int minEncoderArmV = 0;
-    int maxEncoderArmV = 1200;
-    int encoderChangeArmV = 100;
+    int maxEncoderArmV = 1500;
+    int encoderChangeArmV = 300;
+    int distanceToTargetArmV = 0;
+    int encoderTargetsArmV[] = new int[]{minEncoderArmV,300,600,900,1200,maxEncoderArmV};
+    int targetIndexArmV = 0;
 
-    int minEncoderArmH = -300;
+    int minEncoderArmH = 0;
     int maxEncoderArmH = 300;
-    double targetEncoderArmH = 0;
+    double targetEncoderArmH = 0.25;
 
     public void wait(double secs) {
         ElapsedTime t = new ElapsedTime();
@@ -174,15 +177,20 @@ public class NEWCompRobot extends LinearOpMode {
                 pumpMotor.setPower(0);
             }
 
+            //Sets the horizontal part of stone arm to move in and out on toggle (Currently not functioning correctly)
+            /*
             if(gamepad1.a) {
-                stoneArmH.setPower(-180);
+                stoneArmH.setPower(0.5+targetEncoderArmH);
+                wait(0.3);
+                //stoneArmH.setPower(0.5);
+                targetEncoderArmH*=-1;
+                wait(0.5);
             }
-            else if(gamepad1.b) {
-                stoneArmH.setPower(180);
-            }
+             */
 
+            /*
             if (gamepad1.x) {
-                if(stoneArmV.getCurrentPosition()>targetEncoderArmV-10&&stoneArmV.getCurrentPosition()<targetEncoderArmV+10) {
+                if(stoneArmV.getCurrentPosition()>targetEncoderArmV-30&&stoneArmV.getCurrentPosition()<targetEncoderArmV+30) {
                     if (targetEncoderArmV >= minEncoderArmV + encoderChangeArmV) {
                         targetEncoderArmV -= encoderChangeArmV;
                         wait(0.2);
@@ -192,18 +200,56 @@ public class NEWCompRobot extends LinearOpMode {
                     }
                 }
             } else if (gamepad1.y) {
-                if (targetEncoderArmV <= maxEncoderArmV - encoderChangeArmV) {
-                    targetEncoderArmV += encoderChangeArmV;
-                    wait(0.2);
+                if(stoneArmV.getCurrentPosition()>targetEncoderArmV-30&&stoneArmV.getCurrentPosition()<targetEncoderArmV+30) {
+                    if (targetEncoderArmV <= maxEncoderArmV - encoderChangeArmV) {
+                        targetEncoderArmV += encoderChangeArmV;
+                        wait(0.2);
+                    } else {
+                        targetEncoderArmV = maxEncoderArmV;
+                        wait(0.2);
+                    }
                 }
-                else {
-                    targetEncoderArmV = maxEncoderArmV;
-                    wait(0.2);
-                }
+            }
+
+             */
+
+            if(gamepad1.x && targetIndexArmV!=0) {
+                targetIndexArmV--;
+                wait(0.2);
+            }
+            else if(gamepad1.y && targetIndexArmV!=encoderTargetsArmV.length-1) {
+                targetIndexArmV++;
+                wait(0.2);
+            }
+
+            /*
+
+           if(stoneArmV.getCurrentPosition()>targetEncoderArmV-20&&stoneArmV.getCurrentPosition()<targetEncoderArmV+20) {
+               stoneArmV.setPower(0.01);
+           }
+           else if(stoneArmV.getCurrentPosition()<targetEncoderArmV-20) {
+               stoneArmV.setPower(0.5);
+           }
+           else {
+               stoneArmV.setPower(-0.5);
+           }
+
+             */
+
+            //Simple PID System
+            distanceToTargetArmV=Math.abs(stoneArmV.getCurrentPosition()-encoderTargetsArmV[targetIndexArmV]);
+
+
+            if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
+                stoneArmV.setPower(((double)distanceToTargetArmV/maxEncoderArmV)+0.01);
+            }
+            else {
+                stoneArmV.setPower(((distanceToTargetArmV/maxEncoderArmV)+0.01)*-1);
             }
 
             //Drop System
 
+            /*
             if(stoneArmV.getCurrentPosition()<targetEncoderArmV+30) {
                 stoneArmV.setPower(0.3);
             }
@@ -213,6 +259,7 @@ public class NEWCompRobot extends LinearOpMode {
             else {
                 stoneArmV.setPower(0.01);
             }
+             */
 
             //Ratchet System
 
@@ -249,6 +296,7 @@ public class NEWCompRobot extends LinearOpMode {
             telemetry.addData("Next Position", nextEncoderArmV);
             //telemetry.addData("Horizontal Position", stoneArmH.getPosition());
             telemetry.addData("Horizontal Target", targetEncoderArmH);
+            telemetry.addData("Encoder Distance Vertical", distanceToTargetArmV);
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
         }
