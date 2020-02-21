@@ -63,7 +63,8 @@ public class NEWCompRobot extends LinearOpMode {
     private DcMotor rightBack = null;
     private DcMotor pumpMotor = null;
     private DcMotor stoneArmV = null;
-    private CRServo stoneArmH = null;
+    //private CRServo stoneArmH = null;
+    private Servo stoneArmH = null;
     private Servo foundGrabber = null;
 
     // declare motor speed variables
@@ -76,7 +77,7 @@ public class NEWCompRobot extends LinearOpMode {
 
     int targetEncoderArmV = 0;
     int nextEncoderArmV = 0;
-    int minEncoderArmV = 0;
+    int minEncoderArmV = 20;
     int maxEncoderArmV = 1500;
     int encoderChangeArmV = 300;
     int distanceToTargetArmV = 0;
@@ -85,9 +86,15 @@ public class NEWCompRobot extends LinearOpMode {
 
     int minEncoderArmH = 0;
     int maxEncoderArmH = 300;
-    double targetEncoderArmH = 0.25;
+    double targetEncoderArmH = 0.2;
 
-    ElapsedTime timerButtonA = new ElapsedTime();
+    double foundEncoder = 0.5;
+
+    ElapsedTime timerStoneArmH = new ElapsedTime();
+
+    ElapsedTime timerFound = new ElapsedTime();
+
+    ElapsedTime timeDriveZero = new ElapsedTime();
 
     public void wait(double secs) {
         ElapsedTime t = new ElapsedTime();
@@ -109,7 +116,8 @@ public class NEWCompRobot extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotor.class, "br_motor");
         pumpMotor = hardwareMap.get(DcMotor.class, "pump_motor");
         stoneArmV = hardwareMap.get(DcMotor.class, "stoneV_motor");
-        stoneArmH = hardwareMap.get(CRServo.class, "stoneH_servo");
+        //stoneArmH = hardwareMap.get(CRServo.class, "stoneH_servo");
+        stoneArmH = hardwareMap.get(Servo.class, "stoneH_servo");
 
         foundGrabber = hardwareMap.get(Servo.class, "found_servo");
         // Most robots need the motor on one side to be reversed to drive forward
@@ -126,6 +134,25 @@ public class NEWCompRobot extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if(timeDriveZero.seconds()>0.3) {
+            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        else {
+            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
+
+        stoneArmV.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+
+
 
         stoneArmV.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -175,6 +202,10 @@ public class NEWCompRobot extends LinearOpMode {
             leftBack.setPower(LR);
             rightBack.setPower(RR);
 
+            if((LF==0||RF==0||LR==0||RR==0)&&timeDriveZero.seconds()>0.3) {
+                timeDriveZero.reset();
+            }
+
             if(gamepad1.left_trigger>0.3) {
                 pumpMotor.setPower(1);
             }
@@ -182,7 +213,32 @@ public class NEWCompRobot extends LinearOpMode {
                 pumpMotor.setPower(0);
             }
 
+            //stoneArmH.setPosition(0;
+
+
+            if(gamepad1.b&&timerFound.seconds()>0.3) {
+                foundGrabber.setPosition(0.45+foundEncoder);
+                foundEncoder*=-1;
+                timerFound.reset();
+            }
+
+
+
+
+
             //Sets the horizontal part of stone arm to move in and out on toggle (Currently not functioning correctly)
+
+
+            /*
+            if(gamepad1.a&&timerStoneArmH.seconds()>0.3) {
+                stoneArmH.setPosition(0.5+targetEncoderArmH);
+                targetEncoderArmH*=-1;
+                timerStoneArmH.reset();
+            }
+
+             */
+                /*
+
 
             if(gamepad1.a) {
                 stoneArmH.setPower(0.5+targetEncoderArmH);
@@ -192,17 +248,20 @@ public class NEWCompRobot extends LinearOpMode {
                 wait(0.5);
             }
 
+                 */
+
             /*
-            if (gamepad1.a && stoneArmH.getPower() == 0) {
-                stoneArmH.setPower(targetEncoderArmH);
-                timerButtonA.reset();
+            if (gamepad1.a && stoneArmH.getPosition() == 0) {
+                stoneArmH.setPosition(0.5+targetEncoderArmH);
+                timerStoneArmH.reset();
             }
-            if (stoneArmH.getPower() != 0 && timerButtonA.seconds() > 1) {
-                stoneArmH.setPower(0);
+            if (stoneArmH.getPosition() != 0 && timerStoneArmH.seconds() > 1) {
+                stoneArmH.setPosition(0);
                 targetEncoderArmH*=-1;
             }
 
              */
+
 
             /*
             if (gamepad1.x) {
@@ -255,16 +314,21 @@ public class NEWCompRobot extends LinearOpMode {
             //Simple PID System
             distanceToTargetArmV=Math.abs(stoneArmV.getCurrentPosition()-encoderTargetsArmV[targetIndexArmV]);
 
-            if(gamepad1.right_bumper) {
+                /*
                 if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
                     stoneArmV.setPower(((double) distanceToTargetArmV / maxEncoderArmV) + 0.01);
                 } else {
                     stoneArmV.setPower((((double) distanceToTargetArmV / maxEncoderArmV) + 0.01) * -1);
                 }
+
+                 */
+
+            if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
+                stoneArmV.setPower((double) distanceToTargetArmV / maxEncoderArmV);
+            } else {
+                stoneArmV.setPower(((double) distanceToTargetArmV / maxEncoderArmV) * -1);
             }
-            else {
-                stoneArmV.setPower(0);
-            }
+
             //Drop System
 
             /*
@@ -311,9 +375,10 @@ public class NEWCompRobot extends LinearOpMode {
             telemetry.addData("Power Scaling: ", "(%.1f)", joyScale);
             telemetry.addData("Target Position", encoderTargetsArmV[targetIndexArmV]);
             telemetry.addData("Current Position", stoneArmV.getCurrentPosition());
-            telemetry.addData("Horizontal Power", stoneArmH.getPower());
+            telemetry.addData("Horizontal Power", stoneArmH.getPosition());
             telemetry.addData("Horizontal Target", targetEncoderArmH);
             telemetry.addData("Encoder Distance Vertical", distanceToTargetArmV);
+            telemetry.addData("Encoder Foundation", foundEncoder);
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
         }
