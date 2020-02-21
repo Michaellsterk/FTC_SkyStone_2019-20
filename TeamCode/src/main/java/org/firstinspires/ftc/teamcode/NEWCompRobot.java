@@ -64,13 +64,14 @@ public class NEWCompRobot extends LinearOpMode {
     private DcMotor pumpMotor = null;
     private DcMotor stoneArmV = null;
     private CRServo stoneArmH = null;
+    private Servo foundGrabber = null;
 
     // declare motor speed variables
     double RF; double LF; double RR; double LR;
     // declare joystick position variables
     double X1; double Y1; double X2; double Y2;
     // operational constants
-    double joyScale = 0.5;
+    double joyScale = 0.2;
     double motorMax = 0.6; // Limit motor power to this value for Andymark RUN_USING_ENCODER mode
 
     int targetEncoderArmV = 0;
@@ -85,6 +86,8 @@ public class NEWCompRobot extends LinearOpMode {
     int minEncoderArmH = 0;
     int maxEncoderArmH = 300;
     double targetEncoderArmH = 0.25;
+
+    ElapsedTime timerButtonA = new ElapsedTime();
 
     public void wait(double secs) {
         ElapsedTime t = new ElapsedTime();
@@ -107,6 +110,8 @@ public class NEWCompRobot extends LinearOpMode {
         pumpMotor = hardwareMap.get(DcMotor.class, "pump_motor");
         stoneArmV = hardwareMap.get(DcMotor.class, "stoneV_motor");
         stoneArmH = hardwareMap.get(CRServo.class, "stoneH_servo");
+
+        foundGrabber = hardwareMap.get(Servo.class, "found_servo");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -132,10 +137,10 @@ public class NEWCompRobot extends LinearOpMode {
         while (opModeIsActive()) {
 
             if(gamepad1.right_trigger>0.3) {
-                joyScale = 0.1;
+                joyScale = 0.025;
             }
             else {
-                joyScale = 0.5;
+                joyScale = 0.2;
             }
             // Setup a variable for each drive wheel to save power level for telemetry
 
@@ -178,7 +183,7 @@ public class NEWCompRobot extends LinearOpMode {
             }
 
             //Sets the horizontal part of stone arm to move in and out on toggle (Currently not functioning correctly)
-            /*
+
             if(gamepad1.a) {
                 stoneArmH.setPower(0.5+targetEncoderArmH);
                 wait(0.3);
@@ -186,6 +191,17 @@ public class NEWCompRobot extends LinearOpMode {
                 targetEncoderArmH*=-1;
                 wait(0.5);
             }
+
+            /*
+            if (gamepad1.a && stoneArmH.getPower() == 0) {
+                stoneArmH.setPower(targetEncoderArmH);
+                timerButtonA.reset();
+            }
+            if (stoneArmH.getPower() != 0 && timerButtonA.seconds() > 1) {
+                stoneArmH.setPower(0);
+                targetEncoderArmH*=-1;
+            }
+
              */
 
             /*
@@ -239,14 +255,16 @@ public class NEWCompRobot extends LinearOpMode {
             //Simple PID System
             distanceToTargetArmV=Math.abs(stoneArmV.getCurrentPosition()-encoderTargetsArmV[targetIndexArmV]);
 
-
-            if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
-                stoneArmV.setPower(((double)distanceToTargetArmV/maxEncoderArmV)+0.01);
+            if(gamepad1.right_bumper) {
+                if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
+                    stoneArmV.setPower(((double) distanceToTargetArmV / maxEncoderArmV) + 0.01);
+                } else {
+                    stoneArmV.setPower((((double) distanceToTargetArmV / maxEncoderArmV) + 0.01) * -1);
+                }
             }
             else {
-                stoneArmV.setPower(((distanceToTargetArmV/maxEncoderArmV)+0.01)*-1);
+                stoneArmV.setPower(0);
             }
-
             //Drop System
 
             /*
@@ -291,10 +309,9 @@ public class NEWCompRobot extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Power Scaling: ", "(%.1f)", joyScale);
-            telemetry.addData("Target Position", targetEncoderArmV);
+            telemetry.addData("Target Position", encoderTargetsArmV[targetIndexArmV]);
             telemetry.addData("Current Position", stoneArmV.getCurrentPosition());
-            telemetry.addData("Next Position", nextEncoderArmV);
-            //telemetry.addData("Horizontal Position", stoneArmH.getPosition());
+            telemetry.addData("Horizontal Power", stoneArmH.getPower());
             telemetry.addData("Horizontal Target", targetEncoderArmH);
             telemetry.addData("Encoder Distance Vertical", distanceToTargetArmV);
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
