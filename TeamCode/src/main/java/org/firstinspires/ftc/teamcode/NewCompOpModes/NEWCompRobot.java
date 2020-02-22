@@ -79,10 +79,10 @@ public class NEWCompRobot extends LinearOpMode {
     int targetEncoderArmV = 0;
     int nextEncoderArmV = 0;
     int minEncoderArmV = 0;
-    int maxEncoderArmV = 1500;
-    int encoderChangeArmV = 300;
+    int maxEncoderArmV = 1600;
+    int encoderChangeArmV = 200;
     int distanceToTargetArmV = 0;
-    int encoderTargetsArmV[] = new int[]{minEncoderArmV,300,600,900,1200,maxEncoderArmV};
+    int encoderTargetsArmV[] = new int[]{minEncoderArmV,200,400,600,800,1000,1200,1400,maxEncoderArmV};
     int targetIndexArmV = 0;
 
     double minEncoderArmH = 0.1;
@@ -142,19 +142,6 @@ public class NEWCompRobot extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        if(timeDriveZero.seconds()>0.5) {
-            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-        else {
-            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
 
         stoneArmV.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -221,7 +208,7 @@ public class NEWCompRobot extends LinearOpMode {
             }
 
             // After an amount of time we switch the motors to break rather than strafe
-            if(timeDriveZero.seconds()>0.2) {
+            if(timeDriveZero.seconds()>0.1) {
                 leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
