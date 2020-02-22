@@ -77,18 +77,18 @@ public class NEWCompRobot extends LinearOpMode {
 
     int targetEncoderArmV = 0;
     int nextEncoderArmV = 0;
-    int minEncoderArmV = 20;
+    int minEncoderArmV = 0;
     int maxEncoderArmV = 1500;
     int encoderChangeArmV = 300;
     int distanceToTargetArmV = 0;
     int encoderTargetsArmV[] = new int[]{minEncoderArmV,300,600,900,1200,maxEncoderArmV};
     int targetIndexArmV = 0;
 
-    int minEncoderArmH = 0;
-    int maxEncoderArmH = 300;
-    double targetEncoderArmH = 0.2;
+    double minEncoderArmH = 0.1;
+    double maxEncoderArmH = 1;
+    double targetEncoderArmH = 1;
 
-    double foundEncoder = 0.5;
+    double foundEncoder = 0.2;
 
     ElapsedTime timerStoneArmH = new ElapsedTime();
 
@@ -135,7 +135,7 @@ public class NEWCompRobot extends LinearOpMode {
         leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        if(timeDriveZero.seconds()>0.3) {
+        if(timeDriveZero.seconds()>0.5) {
             leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -197,13 +197,33 @@ public class NEWCompRobot extends LinearOpMode {
             RR = Math.max(-motorMax, Math.min(RR, motorMax));
 
             // Send values to the motors
+            /*
             leftFront.setPower(LF);
             rightFront.setPower(RF);
             leftBack.setPower(LR);
             rightBack.setPower(RR);
 
-            if((LF==0||RF==0||LR==0||RR==0)&&timeDriveZero.seconds()>0.3) {
+             */
+
+            // Break System
+
+            // I we are moving reset timer
+            if((LF!=0||RF!=0||LR!=0||RR!=0)) {
                 timeDriveZero.reset();
+            }
+
+            // After an amount of time we switch the motors to break rather than strafe
+            if(timeDriveZero.seconds()>0.3) {
+                leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+            else {
+                leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
 
             if(gamepad1.left_trigger>0.3) {
@@ -224,19 +244,39 @@ public class NEWCompRobot extends LinearOpMode {
 
 
 
-
+            //stoneArmH.setPosition(0);
 
             //Sets the horizontal part of stone arm to move in and out on toggle (Currently not functioning correctly)
 
+            stoneArmH.setPosition(targetEncoderArmH);
+
+            if(gamepad1.dpad_down&&targetEncoderArmH>minEncoderArmH) {
+                targetEncoderArmH-=0.01;
+                timerStoneArmH.reset();
+            }
+            else if(gamepad1.dpad_up&&targetEncoderArmH<maxEncoderArmH) {
+                targetEncoderArmH+=0.01;
+                timerStoneArmH.reset();
+            }
+
+            if(targetEncoderArmH>maxEncoderArmH) {
+                targetEncoderArmH=maxEncoderArmH;
+            }
+            else if (targetEncoderArmH<minEncoderArmH) {
+                targetEncoderArmH=minEncoderArmH;
+            }
 
             /*
             if(gamepad1.a&&timerStoneArmH.seconds()>0.3) {
-                stoneArmH.setPosition(0.5+targetEncoderArmH);
+                stoneArmH.setPosition(0.5-targetEncoderArmH);
                 targetEncoderArmH*=-1;
                 timerStoneArmH.reset();
             }
 
              */
+
+
+
                 /*
 
 
@@ -323,11 +363,15 @@ public class NEWCompRobot extends LinearOpMode {
 
                  */
 
+                /*
+
             if (stoneArmV.getCurrentPosition() < encoderTargetsArmV[targetIndexArmV]) {
                 stoneArmV.setPower((double) distanceToTargetArmV / maxEncoderArmV);
             } else {
                 stoneArmV.setPower(((double) distanceToTargetArmV / maxEncoderArmV) * -1);
             }
+
+                 */
 
             //Drop System
 
