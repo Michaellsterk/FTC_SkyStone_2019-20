@@ -250,7 +250,7 @@ public class GyroTestAuto extends LinearOpMode {
 
             turnBy(90.0,0.1,-0.1);
             wait(0.5);
-            turnTo(90,-0.1,0.1);
+            turnTo(90.0,-0.1,0.1);
             autoEnd = true;
 
             // Show the elapsed game time and wheel power.
