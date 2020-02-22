@@ -66,6 +66,7 @@ public class NEWCompRobot extends LinearOpMode {
     //private CRServo stoneArmH = null;
     private Servo stoneArmH = null;
     private Servo foundGrabber = null;
+    private Servo pumpValve = null;
 
     // declare motor speed variables
     double RF; double LF; double RR; double LR;
@@ -90,12 +91,17 @@ public class NEWCompRobot extends LinearOpMode {
 
     double foundEncoder = 0.2;
 
+    boolean pumpIsRunning = false;
+
     ElapsedTime timerStoneArmH = new ElapsedTime();
 
     ElapsedTime timerFound = new ElapsedTime();
 
     ElapsedTime timeDriveZero = new ElapsedTime();
 
+    ElapsedTime timerValve = new ElapsedTime();
+
+    ElapsedTime timerValveOpen = new ElapsedTime();
     public void wait(double secs) {
         ElapsedTime t = new ElapsedTime();
         t.reset();
@@ -120,6 +126,8 @@ public class NEWCompRobot extends LinearOpMode {
         stoneArmH = hardwareMap.get(Servo.class, "stoneH_servo");
 
         foundGrabber = hardwareMap.get(Servo.class, "found_servo");
+
+        pumpValve = hardwareMap.get(Servo.class, "pump_servo");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -226,12 +234,31 @@ public class NEWCompRobot extends LinearOpMode {
                 rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
 
-            if(gamepad1.left_trigger>0.3) {
+            if(pumpIsRunning) {
                 pumpMotor.setPower(1);
             }
             else {
                 pumpMotor.setPower(0);
             }
+
+            if(gamepad1.left_trigger>0.3&&!pumpIsRunning&&timerValve.seconds()>0.3) {
+                pumpIsRunning=true;
+                timerValve.reset();
+            }
+            else if(gamepad1.left_trigger>0.3&&pumpIsRunning&&timerValve.seconds()>0.3){
+                pumpIsRunning=false;
+                timerValveOpen.reset();
+                timerValve.reset();
+
+            }
+
+            if(timerValveOpen.seconds()>1) {
+                pumpValve.setPosition(.4);
+            }
+            else {
+                pumpValve.setPosition(1);
+            }
+
 
             //stoneArmH.setPosition(0;
 
@@ -244,17 +271,19 @@ public class NEWCompRobot extends LinearOpMode {
 
 
 
+
+
             //stoneArmH.setPosition(0);
 
             //Sets the horizontal part of stone arm to move in and out on toggle (Currently not functioning correctly)
 
             stoneArmH.setPosition(targetEncoderArmH);
 
-            if(gamepad1.dpad_down&&targetEncoderArmH>minEncoderArmH) {
+            if(gamepad1.dpad_up&&targetEncoderArmH>minEncoderArmH) {
                 targetEncoderArmH-=0.01;
                 timerStoneArmH.reset();
             }
-            else if(gamepad1.dpad_up&&targetEncoderArmH<maxEncoderArmH) {
+            else if(gamepad1.dpad_down&&targetEncoderArmH<maxEncoderArmH) {
                 targetEncoderArmH+=0.01;
                 timerStoneArmH.reset();
             }
