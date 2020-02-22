@@ -241,11 +241,11 @@ public class NEWCompRobot extends LinearOpMode {
                 pumpMotor.setPower(0);
             }
 
-            if(gamepad1.left_trigger>0.3&&!pumpIsRunning&&timerValve.seconds()>0.3) {
+            if((gamepad1.left_trigger>0.3||gamepad2.left_trigger>0.3)&&!pumpIsRunning&&timerValve.seconds()>0.3) {
                 pumpIsRunning=true;
                 timerValve.reset();
             }
-            else if(gamepad1.left_trigger>0.3&&pumpIsRunning&&timerValve.seconds()>0.3){
+            else if((gamepad1.left_trigger>0.3||gamepad2.left_trigger>0.3)&&pumpIsRunning&&timerValve.seconds()>0.3){
                 pumpIsRunning=false;
                 timerValveOpen.reset();
                 timerValve.reset();
@@ -263,7 +263,7 @@ public class NEWCompRobot extends LinearOpMode {
             //stoneArmH.setPosition(0;
 
 
-            if(gamepad1.b&&timerFound.seconds()>0.3) {
+            if((gamepad1.b||gamepad2.b)&&timerFound.seconds()>0.3) {
                 foundGrabber.setPosition(0.45+foundEncoder);
                 foundEncoder*=-1;
                 timerFound.reset();
@@ -279,11 +279,11 @@ public class NEWCompRobot extends LinearOpMode {
 
             stoneArmH.setPosition(targetEncoderArmH);
 
-            if(gamepad1.dpad_up&&targetEncoderArmH>minEncoderArmH) {
+            if((gamepad1.dpad_up||gamepad2.dpad_up)&&targetEncoderArmH>minEncoderArmH) {
                 targetEncoderArmH-=0.01;
                 timerStoneArmH.reset();
             }
-            else if(gamepad1.dpad_down&&targetEncoderArmH<maxEncoderArmH) {
+            else if((gamepad1.dpad_down||gamepad2.dpad_down)&&targetEncoderArmH<maxEncoderArmH) {
                 targetEncoderArmH+=0.01;
                 timerStoneArmH.reset();
             }
@@ -357,11 +357,11 @@ public class NEWCompRobot extends LinearOpMode {
 
              */
 
-            if(gamepad1.x && targetIndexArmV!=0) {
+            if((gamepad1.x||gamepad2.x) && targetIndexArmV!=0) {
                 targetIndexArmV--;
                 wait(0.2);
             }
-            else if(gamepad1.y && targetIndexArmV!=encoderTargetsArmV.length-1) {
+            else if((gamepad1.y||gamepad2.y) && targetIndexArmV!=encoderTargetsArmV.length-1) {
                 targetIndexArmV++;
                 wait(0.2);
             }
